@@ -1,0 +1,1020 @@
+'                          Source Listing of:
+'
+'                      English Conjugation System
+'
+'                               E  C  S
+'
+'                            Version: 1.1
+'
+'                          by WR 01/03/1988
+'                         finished: 13/03/88
+'
+' updated:
+'          21.4.89  find ECS.ECS in program folder whereever this is
+'                   auto-load, save & sort of forms table
+'                   scrolling table with arrow keys and ClrHome key
+'                   scrolling table with window slider & scroll fields
+'                   scrolling table with Close and Full field
+'                   scrolling table with alpha keys
+'                   Keyboard Help window
+'                   new function: Principal Forms
+'          22.4.89  refresh windows only once at program start
+'          16.8.89  find correct past form for verbs ending on y
+'                   e.g. fry, fried, fried and not friyed
+'
+'                          GFA-Basic  V 2.0
+'
+'
+Deflist 0
+Void Fre(0) !  force garbage collection
+Version$="1.1"
+Test!=False      ! To be set to TRUE when testing menues and messages
+Defmouse 2
+Deftext 1,0,0,13
+On Error Gosub Err
+Text 0,395,640," English Conjugation System (E.C.S.) Version "+Version$+"  -  August 16th, 1989  by W. R”sler "
+'
+'                                                        PROGRAM INITIALISATION
+'                                                        ======================
+'
+Dim Pers$(6),Perspro$(6),Have$(6),Be$(6),Haken!(2),Table$(3,2000),Tense$(8)
+Tablemax%=0
+Offset%=1
+Table.changed!=False
+' read some basic forms
+For J%=1 To 6
+  Read Pers$(J%),Perspro$(J%),Have$(J%),Be$(J%)
+Next J%
+For J%=1 To 8
+  Read Tense$(J%)
+Next J%
+Arrayfill Haken!(),False
+'                                                           Menue title numbers
+Edi%=11
+Let Remove%=12
+Go%=15
+Principal%=16
+Dash.in.ecs%=17
+Xit%=18
+Show_pars%=21
+Prtr%=22
+Prt.full%=23
+Disp.help%=26
+Prt.help%=27
+'                                                          Load the forms table
+If Exist("ECS.ECS")
+  Let Formstab.file$="ECS.ECS"
+  @Load.tab("ECS.ECS")
+Else
+  Print At(1,1);"Error - the file ECS.ECS is not in the current folder."
+  Print At(1,2);"Please locate the file:"
+  Fileselect "\*.ECS","ECS.ECS",Formstab.file$
+  If Formstab.file$<>""
+    Print
+    Print " Thank you."
+    @Load.tab(Formstab.file$)
+  Else
+    Alert 3,"Sorry - cannot go without this",0,"What|a|pity",I%
+    End
+  Endif
+Endif
+'                                                                   Init screen
+Deffill 1,2,4
+Pbox 0,0,640,400
+@Menueleiste
+Closew 0
+Box 500,5,510,15
+Openw 0
+Resolution%=Xbios(4)
+If Resolution%=0 ! Lores
+  Alert 0,"High or med resolution only ...",1,"Sorry",I%
+  End
+Endif
+'                                                                  Init windows
+If Resolution%=1 ! Medres
+  Restore Medres
+Else             ! Hires
+  Restore Hires
+Endif
+'
+' read window data
+For J%=0 To 2
+  For J1%=2 To 10 Step 2
+    Read X%
+    Dpoke Windtab+12*J%+J1%,X%
+  Next J1%
+Next J%
+'
+' Window 1: the Forms Table
+'
+Titlew 1," Forms Table "
+@Graf_growbox(500,5,10,10,10,30,400,250)
+Infow 1," "
+Openw 1
+Handle1%=Dpeek(Windtab) ! handle of window 1
+Cls
+'
+' Window 2: Dialog window
+'
+Titlew 2," English Conjugation System "
+@Graf_growbox(500,5,10,10,5,290,630,100)
+Openw 2
+Handle2%=Dpeek(Windtab+12) ! handle of window 2
+Cls
+If Test!
+  Print "WR's English Conjugation System - * Test Mode *"
+Endif
+'
+' Window 3: Keyboard Help window
+'
+Titlew 3," Keyboard Help "
+@Graf_growbox(500,5,10,10,425,30,215,245)
+Openw 3
+Handle3%=Dpeek(Windtab+12) ! handle of window 3
+Cls
+'
+' Get ready ...
+'
+On Menu  Gosub Auswahl
+On Menu Message Gosub Message
+On Menu Key Gosub Key
+On Break Cont
+Defmouse 0
+'                                            resume point for the error routine
+Mainloop:
+Menu Off
+'
+' Go !!!!!!
+'                                                             MAIN PROGRAM LOOP
+'                                                             =================
+Do
+  On Menu
+Loop
+'
+'
+'                                                                   SUBROUTINES
+'                                                                   ===========
+'
+'                                                    INITIALIZATION SUBROUTINES
+'
+Procedure Menueleiste !                                      Init the menue bar
+  Local I%,I$
+  Closew 0
+  Dim Menuleiste$(50)
+  For I%=0 To 50
+    Read I$
+    Exit If I$="<ende>"
+    If I$<>"" And I$<>"-"
+      I$=" "+I$+" "
+    Endif
+    Let Menuleiste$(I%)=I$
+  Next I%
+  Menu Menuleiste$()
+  If Not Test!
+    Menu 2,2
+    Menu Dash.in.ecs%,2
+  Endif
+  Openw 0
+Return
+'
+Procedure Make.keyhelp !                          Init the Keyboard Help-Window
+  Cls
+  Deftext 1,0,0,6
+  Local R$
+  Restore Keyhelp
+  If Resolution%=2 ! Hires only
+    Print
+  Endif
+  Do
+    Read R$
+    Exit If R$="<END>"
+    If Resolution%=2 ! Hires only
+      Print
+    Endif
+    Deftext ,4  ! italic
+    Print 'R$;":"
+    If Resolution%=2 ! Hires only
+      Print
+    Endif
+    Read R$
+    Deftext ,0  ! normal
+    Print "     ";R$
+  Loop
+  Deftext 1,0,0,13
+Return
+'
+Procedure Load.tab(F$) !                                   Load the forms table
+  Local J%
+  Defmouse 2
+  Open "I",#1,F$
+  Input #1,Tablemax%
+  For J%=1 To Tablemax%
+    Input #1,Table$(1,J%),Table$(2,J%),Table$(3,J%)
+  Next J%
+  Close #1
+  Defmouse 0
+Return
+'
+'
+'                                                            SYSTEM SUBROUTINES
+'
+Procedure Auswahl !                                            Menue selections
+  Local Sel%,Dummy%
+  Sel%=Menu(0)
+  If Test!
+    Openw 2
+    Print "Test mode - Menue selection ";Sel%
+  Else
+    If Sel%=1 ! Info
+      Alert 0,"Programmed by:|  Wolfram R”sler|  Augustastr. 44-46 |  D-5100 Aachen",1,"got it",Dummy%
+    Endif
+    If Sel%=Xit%
+      @Xit
+    Endif
+    If Sel%=Edi%
+      @Grow.2
+      @Edi
+    Endif
+    If Sel%=Remove%
+      @Grow.2
+      @Remove
+    Endif
+    If Sel%=Go%
+      @Grow.2
+      @Go
+    Endif
+    If Sel%=Principal%
+      @Grow.2
+      @Principal
+    Endif
+    If Sel%=Show_pars% Or Sel%=Prt.full%
+      Haken!(Sel%-Show_pars%)=Not Haken!(Sel%-Show_pars%)
+      @Haken
+    Endif
+    If Sel%=Prtr%
+      If Haken!(1) ! if printer is active
+        Haken!(1)=False ! deactivate it
+      Else
+        @Chk.pr
+        Haken!(1)=Ready.to.print!
+      Endif
+      @Haken
+    Endif
+    If Sel%=Disp.help%
+      @Disp.help
+    Endif
+    If Sel%=Prt.help%
+      @Prt.help
+    Endif
+  Endif
+  Menu Off
+Return
+'
+Procedure Message !                                                GEM messages
+  Local Sel%,Code%
+  Sel%=Menu(1)
+  Code%=Menu(4)
+  If Sel%=20 And Code%=Handle1% !  Redraw Window 1
+    @Tableview(False)
+  Endif
+  If Sel%=20 And Code%=Handle2% !  Redraw Window 2
+    Clearw 2
+  Endif
+  If Sel%=20 And Code%=Handle3% !  Redraw Window 3
+    Openw 3
+    @Make.keyhelp
+    Openw 1
+  Endif
+  If Sel%=21 And Code%=Handle1% !  Open Window 1
+    Openw 1
+  Endif
+  If Sel%=21 And Code%=Handle2% !  Open Window 2
+    Openw 2
+  Endif
+  If Sel%=22                  !  Close Window 1 = scroll to top of forms table
+    @Scroll.formstable(-Tablemax%)
+  Endif
+  If Sel%=23                  !  Full Window 1 = scroll to bottom of forms table
+    @Scroll.formstable(Tablemax%)
+  Endif
+  If Sel%=24 And Menu(5)=0 ! Scroll Up (Window 1 only)
+    @Scroll.formstable(-11)! scroll 11 entries up
+  Endif
+  If Sel%=24 And Menu(5)=1 ! Scroll Down (Window 1 only)
+    @Scroll.formstable(11) ! scroll 11 entries down
+  Endif
+  If Sel%=24 And Menu(5)=2 ! Uparrow (Window 1 only)
+    @Scroll.formstable(-1) ! scroll 1 entry up
+  Endif
+  If Sel%=24 And Menu(5)=3 ! Downarrow (Window 1 only)
+    @Scroll.formstable(1)  ! scroll 1 entry down
+  Endif
+  If Sel%=26               ! Move Vertical Slider (window 1 only)
+    ' determine new offset
+    Let Newoffset%=((Menu(5)*(Tablemax%-12))/1000)+1
+    If Newoffset%<>Offset%
+      @Scroll.formstable(Newoffset%-Offset%)
+    Endif
+  Endif
+Return
+'
+Procedure Key !                                             Keyboard selections
+  Local Sel%,Ascii%
+  Sel%=Menu(14)
+  Ascii%=Sel% Mod 256 ! Ascii code of the key pressed
+  If Test!
+    Openw 2
+    Print "Test mode - key code ";Sel%;"  Ascii ";Sel% Mod 256;"  Scan code ";Sel% Div 256
+  Else
+    If Sel%=7681 ! Control A : add forms table entries
+      @Grow.2
+      @Edi
+    Endif
+    If Sel%=4882 ! Control R : remove entries
+      @Grow.2
+      @Remove
+    Endif
+    If Sel%=8711 ! Control G : Go
+      @Grow.2
+      @Go
+    Endif
+    If Sel%=6416 ! Control P : Principal forms
+      @Grow.2
+      @Principal
+    Endif
+    If Sel%=25088 ! Help     : show Help screen
+      @Disp.help
+    Endif
+    If Sel%=24832 ! Undo     : print Help screen
+      @Prt.help
+    Endif
+    If Sel%=18432 Or Sel%=19200 ! Arrow up or lt : scroll table 1 entry up
+      @Scroll.formstable(-1)
+    Endif
+    If Sel%=20480 Or Sel%=19712 ! Arrow dn or rt : scroll table 1 entry dn
+      @Scroll.formstable(1)
+    Endif
+    If Sel%=18488 Or Sel%=19252 ! Shift up or lt : scroll table 1 page up
+      @Scroll.formstable(-11)
+    Endif
+    If Sel%=20530 Or Sel%=19766 ! Shift dn or rt : scroll table 1 page down
+      @Scroll.formstable(11)
+    Endif
+    If Sel%=18176 ! ClrHome       : scroll to top of table
+      @Scroll.formstable(-Tablemax%)
+    Endif
+    If Sel%=18231 ! Shift ClrHome : scroll to bottom of table
+      @Scroll.formstable(Tablemax%)
+    Endif
+    '
+    ' now: check for alpha keys
+    If Ascii%>=65 And Ascii%<=90 ! Upper case letter
+      Add Ascii%,32 ! transform to lower case
+    Endif
+    If Ascii%>=97 And Ascii%<=122 ! lower case letter
+      @Scroll.to(Chr$(Ascii%))
+    Endif
+  Endif
+  If Sel%=11544 ! Control X      : Exit (active in test mode too)
+    @Xit
+  Endif
+Return
+'
+Procedure Haken !                                      Make the selection hooks
+  Local J%
+  For J%=Show_pars% To Prt.full%
+    Menu J%,-Haken!(J%-Show_pars%)
+  Next J%
+Return
+'
+'
+'                                                    MENUE FUNCTION SUBROUTINES
+'
+Procedure Edi !                                  Add entries to the forms table
+  Local In$,Index%,J%,J1%
+  Titlew 2," Forms Table Editor  -  Add entries"
+  Hidem
+  Do
+    Cls
+    Print "  Please enter the three irregular forms, CR to cancel:"
+    Print
+    Input " 1st form :",In$
+    Exit If In$=""
+    If Left$(In$,3)="to "
+      In$=Right$(In$,Len(In$)-3)
+    Endif
+    ' Set index% to the place in the forms table the word is to be put into.
+    @Search(In$)
+    If Found%>0           ! word already exists
+      Index%=Found%
+    Else                  ! word does not exist yet
+      ' make space for the new word
+      ' first find the position to put the word in
+      Index%=1
+      While Table$(1,Index%)<In$ And Index%<=Tablemax%
+        Inc Index%
+      Wend
+      ' scroll the others down
+      Inc Tablemax%
+      For J%=Tablemax% Downto Index%
+        For J1%=1 To 3
+          Table$(J1%,J%)=Table$(J1%,J%-1)
+        Next J1%
+      Next J%
+      ' and free the space (necessary because of FORM INPUT AS)
+      For J%=1 To 3
+        Table$(J%,Index%)=""
+      Next J%
+    Endif
+    ' Get the three forms and insert them into the table
+    Table$(1,Index%)=In$
+    Print " 2nd form :";
+    Form Input 60 As Table$(2,Index%)
+    Print " 3rd form :";
+    Form Input 60 As Table$(3,Index%)
+    Table.changed!=True
+    ' if a change is done in the part of the forms table visible: refresh it
+    If Index%>=Offset% And Index%<=Offset%+12
+      @Tableview(False)
+    Else
+      ' else: write new # of entries only
+      Infow 1," "+Str$(Tablemax%)+" entries"
+    Endif
+    Openw 2
+  Loop
+  Cls
+  @Graf_shrinkbox(5,290,630,100,500,5,10,10)
+  Titlew 2," English Conjugation System "
+  @Tableview(True)
+  Showm
+Return
+'
+Procedure Remove !                          Remove entries from the forms table
+  Local In$,Index%,J%,J1%
+  Hidem
+  Titlew 2," Forms Table Editor  -  Remove entries"
+  Cls
+  Do
+    Print
+    Input " Please enter the present tense form, CR to cancel :",In$
+    Exit If In$=""
+    If Left$(In$,3)="to "
+      In$=Right$(In$,Len(In$)-3)
+    Endif
+    @Search(In$)
+    If Found%>0
+      Print "   Ok do remove """;In$;""" (Y/N) ? ";
+      A%=Inp(2)
+      If A%=89 Or A%=121  ! Y  or  y
+        Print "Yes"
+        For J%=Found% To Tablemax%
+          For J1%=1 To 3
+            Table$(J1%,J%)=Table$(J1%,J%+1)
+          Next J1%
+        Next J%
+        Dec Tablemax%
+        Table.changed!=True
+        Print " Removed."
+        ' if a change is done in the visible part of the forms table: refresh it
+        If Index%>=Offset% And Index%<=Offset%+12
+          @Tableview(False)
+        Else
+          ' else: write new # of entries only
+          Infow 1," "+Str$(Tablemax%)+" entries"
+        Endif
+        Openw 2
+      Else
+        Print "No"
+        Print " Not removed."
+      Endif
+    Else
+      Print " Sorry, no such word."
+    Endif
+  Loop
+  Cls
+  @Graf_shrinkbox(5,290,630,100,500,5,10,10)
+  Titlew 2," English Conjugation System "
+  @Tableview(True)
+  Showm
+Return
+'
+Procedure Go !             Main Function subroutine: English Conjugation System
+  '
+  Local Person$,Tense$,Verb$,Person%,Verbform$,Past$,Tense%,First%,Last%
+  Do
+    Cls
+    Hidem
+    Print " Please enter the conjugation sceme:"
+    Input "  Person :",Person$
+    Exit If Person$=""
+    If Val?(Left$(Person$))=False
+      Print " Error - please start with a number 1 thru 6."
+    Else
+      Person$=Upper$(Person$)
+      Input "  Tense  :",Tense$
+      Tense$=Upper$(Tense$)
+      Input "  Verb   :",Verb$
+      Cls
+      Person%=Val(Left$(Person$))
+      If Instr(Person$,"PL")>0
+        Add Person%,3
+      Endif
+      If Haken!(2)=True
+        First%=1
+        Last%=6
+      Else
+        First%=Person%
+        Last%=Person%
+      Endif
+      If Person%>6
+        Print " Unknown Person - please consult the Help menu for legal abbreviations."
+      Else
+        If Left$(Verb$,3)="to "
+          Verb$=Right$(Verb$,Len(Verb$)-3)
+        Endif
+        Past$=Verb$
+        If Right$(Verb$)="y"
+          Past$=Left$(Past$,Len(Past$)-1)+"i"
+        Endif
+        If Right$(Verb$)<>"e"
+          Past$=Past$+"e"
+        Endif
+        Past$=Past$+"d"
+        @Search(Verb$)
+        For J%=First% To Last%
+          '
+          ' --------------------------------------------------------------------
+          '
+          '               TENSE PARSER
+          '
+          ' --------------------------------------------------------------------
+          '
+          '             PRESENT TENSE (PRES)
+          '
+          Tense%=0
+          If Left$(Tense$,5)="PRES." Or Left$(Tense$,5)="PRESE" Or Tense$="PRES"
+            Tense%=1
+            If Verb$="be"
+              Verbform$=Be$(J%)
+            Else
+              If Verb$="have"
+                Verbform$=Have$(J%)
+              Else
+                Verbform$=Verb$
+                If J%=3
+                  If Right$(Verbform$)="o"
+                    Verbform$=Verbform$+"e"
+                  Endif
+                  Verbform$=Verbform$+"s"
+                Endif
+              Endif
+            Endif
+          Endif
+          '
+          '             PAST TENSE (PAST)
+          '
+          If Tense$="PAST" Or Left$(Tense$,5)="PAST "
+            Tense%=2
+            If Found%>0
+              Verbform$=Table$(2,Found%)
+            Else
+              Verbform$=Past$
+            Endif
+          Endif
+          '
+          '            PRESENT PERFECT (PRES P)
+          '
+          If Left$(Tense$,9)="PRESENT P" Or Left$(Tense$,7)="PRES. P" Or Left$(Tense$,6)="PRES P"
+            Tense%=3
+            Verbform$=Have$(J%)+" "
+            If Found%>0
+              Verbform$=Verbform$+Table$(3,Found%)
+            Else
+              Verbform$=Verbform$+Past$
+            Endif
+          Endif
+          '
+          '            PAST PERFECT (PAST P)
+          '
+          If Left$(Tense$,6)="PAST P"
+            Tense%=4
+            If Found%>0
+              Verbform$="had "+Table$(3,Found%)
+            Else
+              Verbform$="had "+Past$
+            Endif
+          Endif
+          '
+          '            FUTURE I (FUT I)
+          '
+          If Tense$="FUT I" Or Tense$="FUT. I" Or Tense$="FUTURE I" Or Tense$="FUTURE TENSE" Or Tense$="FUTURE" Or Tense$="FUT"
+            Tense%=5
+            Verbform$="will "+Verb$
+          Endif
+          '
+          '            CONDITIONAL I  (COND I)
+          '
+          If Tense$="COND I" Or Tense$="COND. I" Or Tense$="CONDITIONAL I" Or Tense$="COND" Or Tense$="CONDITIONAL"
+            Tense%=6
+            Verbform$="would "+Verb$
+          Endif
+          '
+          '            FUTURE II (FUT II)
+          '
+          If Tense$="FUT II" Or Tense$="FUT. II" Or Tense$="FUTURE II" Or Tense$="FUTURE PERFECT"
+            Tense%=7
+            If Found%>0
+              Verbform$="will have "+Table$(3,Found%)
+            Else
+              Verbform$="will have "+Past$
+            Endif
+          Endif
+          '
+          '            CONDITIONAL II  (COND II)
+          '
+          If Tense$="COND II" Or Tense$="COND. II" Or Tense$="CONDITIONAL II"
+            Tense%=8
+            If Found%>0
+              Verbform$="would have "+Table$(3,Found%)
+            Else
+              Verbform$="would have "+Past$
+            Endif
+          Endif
+          '
+          ' --------------------------------------------------------------------
+          '
+          If Tense%=0
+            Print "  Unknown Tense - please consult the Help menu for legal abbreviations."
+          Else
+            '
+            If Haken!(1) ! if printer output selected
+              @Chk.pr    ! check if printer is still ready
+              If Not Ready.to.print!
+                Haken!(1)=False
+                @Haken
+              Endif
+            Endif
+            '
+            If Haken!(0)=True
+              Print 'Pers$(J%);", ";Tense$(Tense%);" of to ";Verb$;" :"
+              If Haken!(1)=True
+                Lprint 'Pers$(J%);", ";Tense$(Tense%);" of to ";Verb$;" :"
+              Endif
+            Endif
+            Print 'Perspro$(J%);'Verbform$
+            If Haken!(1)=True And Ready.to.print!
+              Lprint 'Perspro$(J%);'Verbform$
+            Endif
+          Endif
+          If Haken!(2)=True And Haken!(1)=False And J%<>6
+            Print
+            Print "  Please push a key for next form ... ";
+            Void Inp(2)
+            Cls
+          Endif
+        Next J%
+      Endif
+    Endif
+    Print
+    Print "  Please push a key ...";
+    Void Inp(2)
+  Loop
+  Cls
+  Showm
+Return
+'
+Procedure Principal !                                           Principal Forms
+  Local In$,Past$,Perfect$,Regular$
+  Titlew 2," Principal Forms "
+  Hidem
+  Do
+    Input " Enter present tense form of the word (CR to cancel) :",In$
+    Exit If In$=""
+    If Left$(In$,3)="to "
+      In$=Right$(In$,Len(In$)-3)
+    Endif
+    @Search(In$)
+    If Found%=0 ! not found: compute the past and perfect form
+      Past$=In$
+      If Right$(In$)="y"
+        Past$=Left$(In$,Len(In$)-1)+"i"
+      Endif
+      If Right$(In$)<>"e"
+        Past$=Past$+"e"
+      Endif
+      Past$=Past$+"d"
+      Perfect$=Past$
+      Regular$="(regular)"
+    Else       ! if found: get past and perfect form from the forms table
+      Past$=Table$(2,Found%)
+      Perfect$=Table$(3,Found%)
+      Regular$="(irregular)"
+    Endif
+    Print " to ";In$;", ";Past$;", ";Perfect$,Regular$
+    '
+    If Haken!(1) ! if printer output selected
+      @Chk.pr    ! check if printer is still ready
+      If Not Ready.to.print!
+        Haken!(1)=False
+        @Haken
+      Endif
+    Endif
+    '
+    If Haken!(1)
+      Lprint " to ";In$;", ";Past$;", ";Perfect$,,Regular$
+    Endif
+    Print
+  Loop
+  Cls
+  @Graf_shrinkbox(5,290,630,100,500,5,10,10)
+  Titlew 2," English Conjugation System "
+  @Tableview(True)
+  Showm
+Return
+'
+Procedure Xit !                                                 End the program
+  If Table.changed!
+    @Sav
+  Endif
+  Menu Kill
+  Closew 3
+  Closew 2
+  Closew 1
+  Closew 0
+  Cls
+  End
+Return
+'
+Procedure Disp.help !                                   Display the Help screen
+  Local Bl$
+  Sget Bl$
+  Closew 0
+  Cls
+  Print
+  Print "       English Conjugation System Version "+Version$+"  -  HELP SCREEN"
+  Print
+  Print " You may use the following abbreviations:"
+  Print
+  Print "   1st Person Singular:    1st  or  1"
+  Print "   2nd Person Singular:    2nd  or  2"
+  Print "   3rd Person Singular:    3rd  or  3"
+  Print "   1st Person Plural  :    1st Pl  or  1 Pl  or  4"
+  Print "   2nd Person Plural  :    2nd Pl  or  2 Pl  or  5"
+  Print "   3rd Person Plural  :    3rd Pl  or  3 Pl  or  6"
+  Print
+  Print "   Present Tense      :    Present  or  Pres.  or  Pres"
+  Print "   Past Tense         :    Past"
+  Print "   Present Perfect    :    Pres.Perf.  or  Pres. P  or  Pres P"
+  Print "   Past Perfect       :    Past Perf  or  Past P"
+  Print "   Future I           :    Fut. I  or  Fut I  or  Fut"
+  Print "   Future II          :    Fut. II  or  Fut  II"
+  Print "   Conditional I      :    Cond. I  or  Cond I"
+  Print "   Conditional II     :    Cond. II  or  Cond II"
+  Print
+  Print
+  Print "      Please press any key ... ";
+  Void Inp(2)
+  Sput Bl$
+  Openw 0
+Return
+'
+Procedure Prt.help !                 Print the Help screen if there's a printer
+  Local Bold.on$,Bold.off$
+  Bold.on$=Chr$(27)+"E"
+  Bold.off$=Chr$(27)+"F"
+  @Chk.pr
+  If Ready.to.print!
+    Defmouse 2
+    Lprint "       ";Bold.on$;"English Conjugation System Version "+Version$+"  -  HELP SCREEN";Bold.off$
+    Lprint
+    Lprint " You may use the following abbreviations:"
+    Lprint
+    Lprint "   1st Person Singular:    ";Bold.on$;"1st";Bold.off$;"  or  ";Bold.on$;"1";Bold.off$
+    Lprint "   2nd Person Singular:    ";Bold.on$;"2nd";Bold.off$;"  or  ";Bold.on$;"2";Bold.off$
+    Lprint "   3rd Person Singular:    ";Bold.on$;"3rd";Bold.off$;"  or  ";Bold.on$;"3";Bold.off$
+    Lprint "   1st Person Plural  :    ";Bold.on$;"1st Pl";Bold.off$;"  or  ";Bold.on$;"1 Pl";Bold.off$;"  or  ";Bold.on$;"4";Bold.off$
+    Lprint "   2nd Person Plural  :    ";Bold.on$;"2nd Pl";Bold.off$;"  or  ";Bold.on$;"2 Pl";Bold.off$;"  or  ";Bold.on$;"5";Bold.off$
+    Lprint "   3rd Person Plural  :    ";Bold.on$;"3rd Pl";Bold.off$;"  or  ";Bold.on$;"3 Pl";Bold.off$;"  or  ";Bold.on$;"6";Bold.off$
+    Lprint
+    Lprint "   Present Tense      :    ";Bold.on$;"Present";Bold.off$;"  or  ";Bold.on$;"Pres.";Bold.off$;"  or  ";Bold.on$;"Pres";Bold.off$
+    Lprint "   Past Tense         :    ";Bold.on$;"Past";Bold.off$
+    Lprint "   Present Perfect    :    ";Bold.on$;"Pres.Perf.";Bold.off$;"  or  ";Bold.on$;"Pres. P";Bold.off$;"  or  ";Bold.on$;"Pres P";Bold.off$
+    Lprint "   Past Perfect       :    ";Bold.on$;"Past Perf";Bold.off$;"  or  ";Bold.on$;"Past P";Bold.off$
+    Lprint "   Future I           :    ";Bold.on$;"Fut. I";Bold.off$;"  or  ";Bold.on$;"Fut I";Bold.off$;"  or  ";Bold.on$;"Fut";Bold.off$
+    Lprint "   Future II          :    ";Bold.on$;"Fut. II";Bold.off$;"  or  ";Bold.on$;"Fut II";Bold.off$
+    Lprint "   Conditional I      :    ";Bold.on$;"Cond. I";Bold.off$;"  or  ";Bold.on$;"Cond I";Bold.off$
+    Lprint "   Conditional II     :    ";Bold.on$;"Cond. II";Bold.off$;"  or  ";Bold.on$;"Cond II";Bold.off$
+    Defmouse 0
+  Endif
+Return
+'
+'
+'                                                           SERVICE SUBROUTINES
+'
+Procedure Tableview(Make.growbox!) !         Show the forms table in its window
+  Local J%
+  If Make.growbox!
+    @Graf_growbox(500,5,10,10,10,30,400,250)
+  Endif
+  Openw 1
+  If Xbios(4)=1
+    Deftext 1,0,0,6
+  Endif
+  If Tablemax%>0
+    Infow 1," "+Str$(Tablemax%)+" entries"
+  Else
+    Infow 1,"  no entries"
+  Endif
+  Cls
+  If Tablemax%>0
+    @Set.slider
+    For J%=Offset% To Min(Tablemax%,Offset%+11)
+      Print " to ";Table$(1,J%);", ";Table$(2,J%);", ";Table$(3,J%)
+    Next J%
+  Endif
+Return
+'
+Procedure Scroll.formstable(N%) !     scroll the forms table n% entries up/down
+  '
+  ' n%>0 : scroll down, n%<0 : scroll up
+  Local Help%
+  If N%<>0
+    Help%=Max(1,Offset%+N%)         ! not less than 1
+    Offset%=Min(Tablemax%-11,Help%) ! not more than tablemax%-11
+    @Tableview(False)
+  Endif
+Return
+'
+Procedure Scroll.to(A$) !                   Scroll the table to a given string
+  Local Index%
+  Index%=1
+  While Left$(Table$(1,Index%))<A$ And Index%<=Tablemax%-11
+    Inc Index%
+  Wend
+  @Scroll.formstable(Index%-Offset%)
+Return
+'
+Procedure Set.slider !           Set the vert. slider of the forms table window
+  ' 1. set size of slider
+  Dpoke Gintin,Handle1% ! handle of window 1
+  Dpoke Gintin+2,16 ! change size of vertical slider
+  Dpoke Gintin+4,12000/(Tablemax%) ! new slider size
+  Dpoke Gintin+6,0 ! unused
+  Dpoke Gintin+8,0 ! unused
+  Dpoke Gintin+10,0 ! unused
+  Gemsys 105 ! wind_set
+  '
+  ' 2. set position of slider
+  Dpoke Gintin,Handle1% ! handle of window 1
+  Dpoke Gintin+2,9 ! change position of vertical slider
+  Dpoke Gintin+4,(1000*(Offset%-1))/(Tablemax%-12) ! new slider position
+  Dpoke Gintin+6,0 ! unused
+  Dpoke Gintin+8,0 ! unused
+  Dpoke Gintin+10,0 ! unused
+  Gemsys 105 ! wind_set
+Return
+'
+Procedure Search(I$) !                       search an entry in the forms table
+  ' returns the index # of the entry
+  ' (or 0 if not found)
+  ' in the global variable found%
+  Local J%
+  Found%=0
+  For J%=1 To Tablemax%+1
+    If Table$(1,J%)=I$
+      Found%=J%
+    Endif
+  Next J%
+Return
+'
+Procedure Sav !                                            Save the forms table
+  Local File$,J%
+  Alert 3,"You have changed the|forms table.|Insert your ECS diskette and |press ENTER to save.",1,"ENTER|Cancel",J%
+  If J%=1
+    Defmouse 2
+    Open "O",#1,Formstab.file$
+    Print #1;Tablemax%
+    For J%=1 To Tablemax%
+      Print #1;Table$(1,J%);",";Table$(2,J%);",";Table$(3,J%)
+    Next J%
+    Close #1
+    Defmouse 0
+  Endif
+Return
+'
+Procedure Grow.2 !                                   Open window 2 with growbox
+  @Graf_growbox(500,5,10,10,5,290,630,100)
+  Openw 2
+  Handle2%=Dpeek(Windtab+12)
+  Cls
+Return
+'
+Procedure Chk.pr !                                    Check if printer is ready
+  ' return in ready.to.print!:
+  ' TRUE if ready, FALSE if not
+  Local In%
+  Let Ready.to.print!=True
+  If Out?(0)=0
+    Alert 3,"Printer is offline !",1,"Retry|Cancel",In%
+    If In%=1
+      @Chk.pr
+    Else
+      Let Ready.to.print!=False
+    Endif
+  Endif
+Return
+'
+'                                        GEM subroutines: growbox and shrinkbox
+'
+Procedure Graf_growbox(Anf_xpos%,Anf_ypos%,Anf_wide%,Anf_high%,End_xpos%,End_ypos%,End_wide%,End_high%)
+  Dpoke Gintin,Anf_xpos%
+  Dpoke Gintin+2,Anf_ypos%
+  Dpoke Gintin+4,Anf_wide%
+  Dpoke Gintin+6,Anf_high%
+  Dpoke Gintin+8,End_xpos%
+  Dpoke Gintin+10,End_ypos%
+  Dpoke Gintin+12,End_wide%
+  Dpoke Gintin+14,End_high%
+  Gemsys 73
+Return
+Procedure Graf_shrinkbox(Anf_xpos%,Anf_ypos%,Anf_wide%,Anf_high%,End_xpos%,End_ypos%,End_wide%,End_high%)
+  If Resolution%=1 ! Medres
+    Div Anf_ypos%,2
+    Div Anf_high%,2
+    Div End_ypos,2
+    Div End_high,2
+  Endif
+  Dpoke Gintin,End_xpos%
+  Dpoke Gintin+2,End_ypos%
+  Dpoke Gintin+4,End_wide%
+  Dpoke Gintin+6,End_high%
+  Dpoke Gintin+8,Anf_xpos%
+  Dpoke Gintin+10,Anf_ypos%
+  Dpoke Gintin+12,Anf_wide%
+  Dpoke Gintin+14,Anf_high%
+  Gemsys 74
+Return
+'
+'
+'                                                              ERROR SUBROUTINE
+'
+Procedure Err
+  Local In%
+  On Error Gosub Err
+  Alert 3,"HELP !|An Error # "+Str$(Err)+" has occured.|  ",1,"Cancel",In%
+  Resume Mainloop ! nothing else possible in compiled programs
+Return
+'
+'
+'                                                                         DATAs
+'
+'                                Personal Pronouns & forms of to have and to be
+Data 1st Person Singular,I,have,am
+Data 2nd Person Singular,You,have,are
+Data 3rd Person Singular,He/she/it,has,is
+Data 1st Person Plural,we,have,are
+Data 2nd Person Plural,You,have,are
+Data 3rd Person Plural,They,have,are
+'
+'                                                                        Tenses
+'
+Data Present Tense,Past Tense,Present Perfect,Past Perfect,Future I,Conditional I,Future II,Conditional II
+'
+'                                                                     Menu Data
+'
+Data ,E.C.S.  Version 1.1   by WR 22/4/89   in GFA-Basic 2.0   * PUBLIC DOMAIN *,---------------------------------------------------------------------------,Acc1,Acc2,Acc3,Acc4,Acc5,Acc6,""
+Data Forms Tbl,Add entries      [^A],Remove entries   [^R],""
+Data E.C.S.,Conjugate         [^G],Principal forms   [^P],----------------------,Exit              [^X],""
+Data Options, show conj. sceme, Printer output, show full conjugation,""
+Data Help,Display Help screen  [HELP],Print Help screen    [UNDO],"",""
+Data <ende>
+'
+'                                                                   Window Data
+Hires:
+' Window 1
+Data 471,10,30,400,245
+' Window 2
+Data 1,5,290,630,103
+' Window 3
+Data 1,425,30,210,245
+'
+Medres:
+' Window 1
+Data 471,10,15,400,125
+' Window 2
+Data 1,5,145,630,51
+' Window 3
+Data 1,425,15,215,125
+'
+'
+'                                                           Keyboard Help texts
+Keyhelp:
+Data Arrow up/left,scroll 1 entry up,Arrow down/right,scroll 1 entry down
+Data Shift Arrow up/left,scroll 1 page up,Shift Arrow down/right,scroll 1 page down
+Data Letter keys A-Z or a-z,scroll to letter
+Data "Ctr A,R,G,P,X;HELP,UNDO",see pull-down menues
+Data <END>
+'
+'
+'                                                                       THE END
+'                                                                                   *** WITH A DEEP GASSHO TO SAGAWA SENSEI ***

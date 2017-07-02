@@ -1,0 +1,256 @@
+07201030305800
+1
+2Seite #
+F0110030
+9[........................................................]011
+€
+  „EnglishConjugationSystem€
+
+ E.C.S.Version1.1€16.8.1989
+
+EinPublic-Domain-ProgrammvonWolframR”sler€
+
+€
+   ˆPROGRAMMANLEITUNG€
+
+
+ˆ1)ZweckdesProgramms€
+
+ECSisteinProgramm,mitdemesm”glichist,Verbenaufenglischzu
+konjugieren.Esantwortetalsoz.B.aufeineEingabewie"1stPerson
+SingularPresentPerfectoftogo"mit"Ihavegone".Hierzubenutztdas
+ProgrammeineTabellemitdenverschiedenenFormenderunregelm„igen
+Verben,dievomAnwenderbeliebigerweitertwerdenkann.306Verben
+werdenbereitsmitgeliefert,insgesamthatdieTabellePlatzfr2000
+Stck.
+DasProgrammistausdrcklichinderLage,ˆalle€englischenVerbenzu
+konjugierenundnichtnurdieunregelm„igen(wiebeiderersten
+Ver”ffentlichungdesProgrammsimpd-ServicederST-Computerirrtm
+licherweiseangegeben).Esenth„lteinenAlgorithmus,mitdemdie
+Stammformenregelm„igerVerbenautomatischermitteltwerden.EinVerb
+wirdalsregelm„igbetrachtet,wennessichnichtinderFormentabelle
+befindet.
+DadieseFormentabellemitihren306Verbenalseinigermaenvollst„ndig
+zubetrachtenist,istECSinderLage,
+-s„mtlicheVerbenderenglischenSprache
+-ins„mtlichenPersonen
+-unds„mtlichenZeiten
+korrektzukonjugieren.
+
+ˆ
+2)DasProgramm
+€
+bestehtauskompiliertemGFA-Basic.DerQuellcodegeh”rtzumLieferum
+fang.AlleAnregungenundHinweiseaufFehlersinddemAutorjederzeit
+willkommen.
+ECSistfreikopierbar.Frweresnochnichtwei,dasbedeutet:
+1)EsgibtkeinCopyright,mankann,darfundsolldasProgrammsooft
+kopierenundweitergebenwieebenm”glich.
+2)DerErwerbdesProgrammsistumsonst.Esdarfnichtverkauftoder
+anderweitigkommerziellbenutztwerden.Wertrotzdemdafrbezahlen
+will,oderwerdieArbeitdesAutorsanerkennenwill,schicktbitteden
+Betrag,denihmdasProgrammwertist.
+3)DerQuellcodedesProgrammsistebenfallsfreierh„ltlich.Jederdarf
+dasProgrammerweitern,wieesihmgef„llt.WermeienNamenrausstreicht
+unddasProgrammunterseinemNamenweiterverbreitet,isteinArsch
+loch.
+
+DieVersion1.1vonECSentstandam21.4.89zwischenungef„hrhalb6
+abendsund1Uhrnachts.SiehatgegenberderVersion1.0folgende
+Neuerungen:
+
+1. dieDateiECS.ECSwirdvomaktuellenLaufwerkgelesen,auchwenn
+dasProgrammaufRAM-oderHarddiskoderineinemanderenOrdner
+alsECSinstalliertist.
+2. derAnwenderhatkeineSorgenmehrmitdemLaden,Speichernund
+€€SortierenderFormen-Tabelle,dasgehtjetztallesautomatisch.
+3. zumBl„tterninderFormentabellestehenjetztalleM”glichkei
+teneinesGEM-FenstersundnocheinpaarmehrzurVerfgung.
+4. esgibteindrittesFensternamens"KeyboardHelp",indem
+st„ndigeinešbersichtberdieverfgbarenTastaturfunktionen
+steht.
+5. nebendemKonjugierenvonVerbengibtesjetzteineFunktion
+"PrincipalForms",mitderdiedreiFormeneinesVerbes(regelm„ig
+odernicht)angesehenwerdenk”nnen.
+6. dieGrow-undShrinkboxenpassengenauindieFenster,auchin
+mittlererAufl”sung.
+7. dasProgrammlistingwurdeaufger„umtundnochausfhrlicher
+kommentiert.EinigeVariablenbekamenneueNamen.
+8. dieFormentabellewurdeerweitertundenth„ltnuns„mtliche
+unregelm„igenVerbenausLangenscheidtsGroemSchulw”rterbuch
+Englisch-Deutsch(Rund80000Stichw”rterauf1440Seiten,aus
+TraditionimmeraufdemneuestenStand).Daruntersolltenalle
+Verbensein,diemanw„hrendseinerSchullaufbahnsokennenlernt.
+9.dieletztenderungkamam16.8.89hinzu,alsmirauffiel,da
+     derAlgorithmusdieVergangenheitsformvonVerben,dieaufy
+     enden, nichtkorrektbildet.DieserFehleristbehoben,esheit
+     jetztkorrekterweise"tofancy,fancied,fancied"anstellevon
+     "fancyed".
+
+
+ˆ3)Hardware
+€
+ECSl„uftaufjedemST.DasSystemmuaufmittlereoderhoheAufl”sung
+eingestelltsein.AuerdemkanneinEpson-kompatiblerDruckerverwendet
+werden.
+
+
+ˆ4)Software
+€
+ZumLieferumfanggeh”renfolgendeDateien:
+
+ECS.PRG        dasProgramm
+ECS.ECS        dieFormentabelle
+ECS.LST        derSourcecodeinGFA-Basic2.0
+ECS.1ST        dieseAnleitung
+ECS.DOC        einHinweisfrLeute,diekein1stWordhaben.
+
+ECS.PRGwirdmitDoppelklickgestartet.NachdemLadenwird,falls
+vorhanden,dieDateiECS.ECSausdemOrdnergeladen,indemsichECS.PRG
+befundenhat.DieseDateienth„ltdieTabellemitdenunregelm„igen
+Formen.WenndieDateinichtgefundenwird,muderAnwendersiein
+einerFileselect-Boxangeben(z.B.wennirgendwerihrenNamenge„ndert
+hat).KlicktmanindieserFileselect-Boxauf"Abbruch",sowirddas
+Programmbeendet.
+ZumLieferumfanggeh”renauerdiesenbeidenDateiennochdasSource
+listingunddieAnleitung.
+
+
+ˆ5)DasProgramm-Desktop
+€
+enth„lteineMenueleisteunddreiFenster.
+„
+ˆ5.1)DasFormsTable-Fenster(links)
+€zeigteinenAusschnittausderFormentabelle.WievieleEintr„geinder
+Tabelleinsgesamtvorhandensind,stehtinderInfo-ZeiledesFensters.
+€€MankanninderTabellefolgendermaenbl„ttern:
+mitdenPfeilenunddemRollbalkendesFensterswiegewohnt,
+mitdemClose-FeldzumBeginnderListe,
+mitdemFull-FeldzumEndederListe,
+mitdenTastenPfeilAuf/Ab/Rechts/LinksmitundohneShiftwieim
+Hilfsfensterangegeben,
+mitderCLRHOME-TastezumBeginnderListe,
+mitShiftCLRHOMEzumEndederListe,
+mitdenTastenAbisZzumerstenEintrag,dermitdemjeweiligen
+Buchstabenbeginnt.
+„
+ˆ5.2)DasDialog-Fenster(unten)
+€wirdzurEin-undAusgabederMenuefunktionenbenutzt,siehedazuweiter
+unten.
+
+ˆ5.3)DasKeyboardHelp-Fenster(rechts)€
+zeigteinešbersichtberdieTastenfunktionen.Diesisteinreines
+šbersichtsfenster,eskannnichtmitMausklickaktiviertwerden.
+
+S„mtlicheFenstersindstatisch,d.h.siek”nnennichtbewegt,geschlos
+senoderinihrerGr”ever„ndertwerden.
+
+
+ˆ6)DieMenuezeile
+€
+enth„ltfnfMenues:Desk,FormsTable,E.C.S.,OptionsundHelp.Die
+AccessoriesimDesk-Menuesindaktivundk”nnenbenutztwerden.
+
+
+ˆ6.1)DasFormsTable-Menue
+€
+Hieristnunwirklichnichtssogeblieben,wieesinVersion1.0war.Es
+gibtnurnochzweiMenuepunkte:
+
+Add entries€wirdbenutzt,umneueEintr„gezurFormentabellehinzuzuf
+gen.NachderAnwahlgibtmandiePr„sensformdesWortesein.Fallsdas
+Wordschonvorhandenist,kannmandieanderenbeidenFormeneditieren.
+Wennnicht,mumandiebeidenanderenFormenneueingeben.
+Danachwirddien„chsteFormeingegeben.EinDruckaufENTERbeendetdie
+Eingabe.
+
+Remove€ entries€dientdazu,Eintr„gezul”schen.Dazugibtmandie
+Pr„sensformein(oderENTERzumAbbruch).NacheinerSicherheitsabfrage
+wirddasWortgel”scht.
+
+EsgibtkeineOption,umdieTabelleauszudrucken.Wertrotzdemein
+DruckerlistingderTabellewill,kannECS.ECSvomDesktopausdrucken
+oderineinTextprogrammeinlesen.DieersteZahlinderDateiist
+brigensdieAnzahlderEintr„ge.
+DieDateisollteallerdingsnichtmiteinemTextprogrammver„ndert
+werden!!!DadurchkanndieOrdnungderTabelledurcheinanderkommen.Fr
+dasProgrammspielteskeineRolle,inwelcherReihenfolgesichdie
+Eintr„gebefinden(beimSuchenwirddieTabelleeinfachvonobennach
+untendurchgesucht,dasgehtinnullkommanixundwrdeauchdurch
+komplizierteSuchalgorithmennichtsprbarschneller),allerdings
+basiertdieFunktion"Bl„tternnachBuchstabentaste"darauf,dadie
+Tabellesortiertist.
+ˆ
+
+6.2)DasE.C.S.-Menue
+ˆ€
+Conjugate€startetdaseigentlicheProgramm.MangibtnacheinanderPerson
+(z.B.1Sing),Zeit(z.B.PresPerf)undVerb(z.B.go)ein,dann
+antwortetdasProgrammmitderentsprechendenForm(s.a.6.3).Umden
+Moduszuverlassen,drcktmanaufdieFragenachderPersondieRETURN-
+TasteohneEingabe.ErlaubteAbkrzungenfrdieeinzelnenAngaben
+befindensichimHilfsbild(vgl.6.4).DieVerbenk”nnenmitoderohne
+vorgestelltes"to"eingegebenwerden.
+
+Principal€ forms€gibtnurdiedreiStammformeneinesWortesaus.Geben
+SiedasWort(Pr„sensform)ein,esfolgendanndiedreiFormen.Wenn
+Druckerausgabegewnschtist(s.Kap.6.3),werdendieFormenauerdem
+aufdemDruckerausgegeben.
+
+Exit€beendetdasProgrammdirektohneSicherheitsabfrage.Wenndie
+Formentabellever„ndertwordenist,wirdmanineinerAlertboxaufgefor
+dert,dieECS-Diskette(die,vonderdasProgrammgestartetwurde)
+einzulegen.DieFormentabellewirddannindieselbeDatei(normalerweise
+ECS.ECS)geschrieben,vondersieamProgrammanfanggelesenwurde.
+KlicktmaninderAlertboxauf"Cancel",sowirddieTabellenicht
+gespeichert,dasProgrammabertrotzdembeendet.
+
+
+ˆ6.3)DasOptionen-Menue
+€
+DieEintr„gediesesMenuesk”nnendurchAnklickenaktiviertwerden.Das
+Auswahlh„kchenzeigtan,obeinEintragaktivist.
+
+ShowConjugationscheme€:vorderAusgabederkonjugiertenFormwird
+auerdemdieBenutzereingabeausgegeben.
+
+PrinterOutput€:DieAusgabeerfolgtauerdemaufdemDrucker.
+
+Showfullconjugation€:EswirdnichtnurdieFormdereingegebenen
+Personausgegeben,sondernalleFormender1.PersonSingularbiszur3.
+PersonPlural.
+
+
+ˆ6.4)DasHelp-Menue
+€
+MitdenEintr„gendiesesMenueswirdeinešbersichtberdiezul„ssigen
+AbkrzungenderZeitengegeben.
+
+DisplayHelpScreen€zeigtdieHilfstafelaufdemBildschirm.
+
+PrintHelpScreen€drucktdieHilfstafelaus.
+
+
+AlleMenueeintr„ge(bisaufdieimOptionen-Menu)k”nnenauchdurch
+Tastendruckaktiviertwerden.DieentsprechendenTastensindinden
+Menuesangefhrt.EinHochpfeil(^)bedeutet:TastezusammenmitCONTROL
+drcken.
+
+
+ˆ7)DerAutor
+€
+freutsichberjedeReaktion,Kritik,Anregung,Programmerweiterungund
+besondersberjedeSpende.
+
+
+€€WolframR”sler
+Augustastr.44-46
+D-5100Aachen
+
+
+ˆ8)Gre
+€
+anBudo-ClubNinjaundalleEngl„nder,besondersandieCrundensaus
+Brighton,sowieanalleIaido-Kas,besondersJonas,Wim,Elisabethund
+natrlichSagawaSensei.
+
