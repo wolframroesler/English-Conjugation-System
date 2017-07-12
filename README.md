@@ -4,6 +4,8 @@ This program, written in 1988 for the Atari ST using the GFA BASIC language, con
 
 ![Screenshot](screenshot.png)
 
+See it in action here: https://youtu.be/UdvVHBagj60
+
 ## Example Dialogs
 
 Conjugate
